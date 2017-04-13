@@ -1,0 +1,11 @@
+*.out
+*.o
+*.so
+*.s
+*.a
+*.bc
+*/bin/
+*.cmake
+*.ll
+simpoints
+weights
