@@ -17,7 +17,7 @@ make ex
 cd SimPoints
 make Simpoint
 cd ..
-Simpoints.2.3/bin/simpoint -maxK 30 -loadFVFile count.bb -saveSimpoints simpoints -saveSimpointWeights weights
+SimPoint.3.2/bin/simpoint -maxK 30 -loadFVFile count.bb -saveSimpoints simpoints -saveSimpointWeights weights
 ```
 
 The results of this program are not very interesting because the program is so small, but you should be able to verify how many times each basic block executes by looking at the .bb file.
@@ -49,7 +49,7 @@ cd lulesh2.0.3
 make all
 cd ..
 bin/lulesh2.0countbb
-Simpoints.2.3/bin/simpoint -maxK 30 -loadFVFile count.bb -saveSimpoints simpoints -saveSimpointWeights weights
+SimPoint.3.2/bin/simpoint -maxK 30 -loadFVFile bin/count.bb -saveSimpoints simpoints -saveSimpointWeights weights
 ```
 
 ### Connections
