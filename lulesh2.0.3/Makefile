@@ -49,7 +49,7 @@ LDFLAGS = -g -O3 -fopenmp -lm
 all: $(LULESH_EXEC_COUNTBB)
 
 countfunc:
-	$(CLANG) -c -o count.bc ../count_bb/count.cpp
+	$(CLANG) -c -DINTERVAL=10000000 -o count.bc ../count_bb/count.cpp
 
 $(LULESH_EXEC_COUNTBB): $(ASSEMSOPT2.0) countfunc
 	@echo "Linking"

@@ -20,10 +20,10 @@ cd ..
 Simpoints.2.3/bin/simpoint -maxK 30 -loadFVFile count.bb -saveSimpoints simpoints -saveSimpointWeights weights
 ```
 
-The results of this program are not very interesting because the program is so small, but you should be able to verify how many times each basic block executes.
+The results of this program are not very interesting because the program is so small, but you should be able to verify how many times each basic block executes by looking at the .bb file.
 
 ### Explanation of SimPoints
-The main idea behind SimPoints is to reduce the amount of code you need to execute to simulate a program. SimPoints identifies the most important portions of a program so that instead of simulating the program in its entirety, you can get within 90-95% of the full program by just executing pieces of it. First, simpoints breaks up a program into intervals of assembly instructions. For any decent sized program, the value 10 million is recommended. You can change the interval used in LLVM-Simpoints by changing the INTERVAL macro in the count_bb/count.cpp file. This value will need to decrease significantly for small programs. Note that you do not need to build the LLVM analysis pass again after changing INTERVAL but you will need to re-build the benchmark. SimPoints then uses k-means to find the clusters of execution in the program. These clusters tend to correlate to areas of heavy computation and program phases.
+The main idea behind SimPoints is to reduce the amount of code you need to execute to simulate a program. SimPoints identifies the most important portions of a program so that instead of simulating the program in its entirety, you can get within 90-95% of the full program by just executing pieces of it. First, simpoints breaks up a program into intervals of assembly instructions. For any decent sized program, the value 10 million is recommended. You can change the interval used in LLVM-Simpoints by changing the -DINTERVAL number in the compilation step. This value will need to decrease significantly for small programs. Note that you do not need to build the LLVM analysis pass again after changing INTERVAL but you will need to re-build the benchmark. SimPoints then uses k-means to find the centers of each program phase. These clusters tend to correlate to areas of heavy computation within each program phase. Then, when simulating the program, you can execute the basic blocks the number of times specified in the basic block vectors for each SimPoint.
 
 The results in the "simpoints" file tell you which execution intervals are important and gives each execution interval a unique number. For example, here is how to interpret the file:
 ```
@@ -36,6 +36,8 @@ The results in the "weights" file tell you how much each interval contributes to
 0.12443 1
 // For interval with the ID 1, it contributes to 12.4% of the execution time of this program.
 ```
+
+I added a step to the countBB pass that prints out the llvm IR of each basic block along with its ID number. This creates a file called blocks.bbs. You can enable this by adding the CREATE_BBS macro to the countBB.cpp source file. I took it out by default because it makes the pass run much slower. I supplied the blocks.bbs file for lulesh. You can use this file to construct the simulation program based on the SimPoints and basic block vector data. You can run the simulation program on a simulator like Marss86.
 
 ### Testing a Benchmark
 You can test LLVM-SimPoints on any program. I have included an example for running it on LULESH.

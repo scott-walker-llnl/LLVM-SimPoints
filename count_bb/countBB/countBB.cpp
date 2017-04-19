@@ -10,6 +10,10 @@
 #include "llvm/IR/InstIterator.h"
 #include "llvm/IR/User.h"
 #include "llvm/IR/Instructions.h"
+#include "llvm/Support/raw_ostream.h"
+#include <fcntl.h>
+
+//#define CREATE_BBS
 
 
 using namespace llvm;
@@ -19,6 +23,9 @@ struct count_bb : public ModulePass {
 	static char ID;
 	Function *hook;
 	unsigned long block_counter = 0;
+#ifdef CREATE_BBS
+	raw_ostream *blocks;
+#endif
 	count_bb() : ModulePass(ID) {}
 
 	virtual bool runOnBasicBlock(Function::iterator &BB);
@@ -29,6 +36,17 @@ char count_bb::ID = 0;
 
 bool count_bb::runOnModule(Module &M)
 {
+	//blocks.open("blocks.bbs", std::ofstream::out);	
+#ifdef CREATE_BBS
+	int fd = open("blocks.bbs", O_WRONLY | O_TRUNC | O_CREAT, 0644);
+	if (fd < 0)
+	{
+		errs() << "Unable to open file\n";
+		return false;
+	}
+	std::error_code EC;
+	blocks = new raw_fd_ostream(fd, false, false);
+#endif
 	Constant *hookFunc;
 	hookFunc = M.getOrInsertFunction("countBlocks", Type::getVoidTy(M.getContext()), 
 		Type::getInt64Ty(M.getContext()), Type::getInt64Ty(M.getContext()), NULL);
@@ -58,6 +76,10 @@ bool count_bb::runOnModule(Module &M)
 		}
 	}
 	errs() << "done\n";
+#ifdef CREATE_BBS
+	delete blocks;
+#endif
+	//close(fd);
 	return false;
 }
 
@@ -69,6 +91,14 @@ bool count_bb::runOnBasicBlock(Function::iterator &BB)
 	Value *args[] = {ConstantInt::get(Type::getInt64Ty(CI->getContext()),
 		block_counter), ConstantInt::get(Type::getInt64Ty(CI->getContext()),
 		(unsigned long) BB->size())};
+#ifdef CREATE_BBS
+	*blocks << "Basic Block " << block_counter << "\n";
+	for (BasicBlock::iterator BI = BB->begin(), E = BB->end(); BI != E; ++BI)
+	{
+		CI = dyn_cast<Instruction>(BI);
+		*blocks << "\t" << *CI << "\n";
+	}
+#endif
 	Instruction *newInst = CallInst::Create(hook, args);
 	Builder.Insert(newInst);
 	return true;

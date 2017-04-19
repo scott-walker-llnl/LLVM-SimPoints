@@ -1,7 +1,7 @@
 #include <cstdio>
 #include <cstdlib>
 
-#define INTERVAL 10000000
+//#define INTERVAL 10000000
 #define STARTSIZE 1024
 int var;
 void func() {};
