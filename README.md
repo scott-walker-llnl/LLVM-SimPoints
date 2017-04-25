@@ -6,7 +6,7 @@ LLVM-SimPoints is an updated version of the original SimPoints project which has
 ### Building
 There are four steps to using LLVM-Simpoints. First, compile the LLVM dynamic analysis pass. Second, build your program with that pass. Third, execute your program, a .bb file will be produced. Finally, feed the .bb file into the SimPoints analysis code to generate the "simpoint" and "weights" files for the program. The following shows you how to run the simple example program:
 
-[1]:##### Build Dynamic Analysis Pass
+##### Build Dynamic Analysis Pass
 ```
 export TOP=$(pwd)
 cd count_bb
@@ -61,7 +61,7 @@ Back in the day, when people were simulating their programs on new theoretical p
 ### Testing a Benchmark
 You can test LLVM-SimPoints on any program. I have included an example for running it on LULESH.
 ```
-# build the [LLVM Dynamic Analysis Pass][1] first
+# build the [LLVM Dynamic Analysis Pass][##### Build Dynamic Analysis Pass] first
 mkdir bin
 cd lulesh2.0.3
 make all
