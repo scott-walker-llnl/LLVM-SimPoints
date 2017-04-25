@@ -58,12 +58,12 @@ The results in the "weights" file tell you how much each interval contributes to
 // For interval with the ID 1, it contributes to 12.4% of the execution time of this program.
 ```
 
-I added a step to the countBB pass that prints out the llvm IR of each basic block along with its ID number. This creates a file called blocks.bbs. You can enable this by adding the CREATE_BBS macro to the countBB.cpp source file. I took it out by default because it makes the pass run much slower. I supplied the blocks.bbs file for lulesh. You can use this file to construct the simulation program based on the SimPoints and basic block vector data. You can run the simulation program on a simulator like Marss86.
+Back in the day, when people were simulating their programs on new theoretical processors to see if there would be any improvements, SimPoints made performing such simulations much faster. Normally simulating a processor means the programs running on the simulator will be really slow. I'm unsure of how much this is done in modern days though. I chose this project because I am using this kind of analysis to find important basic blocks in a program so that, based on the basic blocks, I can understand program behavior as a whole. 
 
-Back in the day, when people were simulating their programs on new theoretical processors to see if there would be any improvements, SimPoints made performing such simulations much faster. Normally simulating a processor means the programs running on the simulator will be really slow. I'm unsure of how much this is done in modern days though. I chose this project because I am using this kind of analysis to find important basic blocks in a program so that, based on the basic blocks, I can understand program behavior as a whole. One problem with collecting the basic block vectors for SimPoints is that, like any dynamic analysis, it makes the program run much slower. From what I saw, my dynamic analysis pass caused a 2x slowdown. Also, my pass approximates the instruction intervals, since they are based on LLVM-IR instead of x86 assembly. However, I think that this is probably an improvement, since LLVM-IR instructions account for logical operations. In the original method of doing the intervals based on x86 assembly instructions, an interval may end in the middle of an important operation.
+One problem with collecting the basic block vectors for SimPoints is that, like any dynamic analysis, it makes the program run much slower. From what I saw, my dynamic analysis pass caused a 2x slowdown. Also, my pass approximates the instruction intervals, since they are based on LLVM-IR instead of x86 assembly. However, I think that this is probably an improvement, since LLVM-IR instructions account for logical operations. In the original method of doing the intervals based on x86 assembly instructions, an interval may end in the middle of an important operation. For example, you would not want the interval to end in the middle of an "alloca", which is multiple x86 instructions.
 
 ### Testing a Benchmark
-You can test LLVM-SimPoints on any program. I have included an example for running it on LULESH. Build the [LLVM Dynamic Analysis Pass][#Build Dynamic Analysis Pass] first.
+You can test LLVM-SimPoints on any program. I have included an example for running it on LULESH. Build the [LLVM Dynamic Analysis Pass][#build-dynamic-analysis-pass] first.
 ```
 mkdir bin
 cd lulesh2.0.3
@@ -72,6 +72,35 @@ cd ..
 bin/lulesh2.0countbb
 SimPoint.3.2/bin/simpoint -maxK 30 -loadFVFile count.bb -saveSimpoints simpoints -saveSimpointWeights weights
 ```
+### Using LLVM-SimPoints
+If you want to use LLVM-SimPoints on your own code, here is how:
+
+1. You must use clang or clang++. You will also need llvm-link, opt, and llc.
+2. Compile the counting function (count_bb/count.cpp). You must specify the instruction interval in this step with "-DINTERVAL=N" where N is the instruction interval size. You should also add -O3 to minimize profiling overhead.
+```
+clang -emit-llvm -O3 -c -DINTERVAL=10000000 -o count.bc count_bb/count.cpp
+
+```
+4. Compile your source code to LLVM-IR. 
+```
+clang -emit-llvm -c -o exl.bc example.cpp
+```
+5. Link your source BC file to the counting code
+```
+llvm-link exl.bc count.bc -o=ex_count.bc
+```
+6. Use opt, loading and using the dynamic analysis pass
+```
+opt -load count_bb/build/countBB/libcountBB.so -countBB ex_count.bc -o ex_count_opt.bc
+```
+7. Compile the LLVM-IR
+```
+llc -O3 ex_count_opt.bc 
+clang -O3 ex_count_opt.s -o ex.out
+```
+
+I added a step to the countBB pass that prints out the llvm IR of each basic block along with its ID number. This creates a file called blocks.bbs. You can enable this by adding the CREATE_BBS macro to the countBB.cpp source file. I took it out by default because it makes the pass run much slower. I supplied the blocks.bbs file for lulesh. You can use this file to construct the simulation program based on the SimPoints and basic block vector data. You can run the simulation program on a simulator like Marss86.
+
 
 ### Connections
 1. To get SimPoints to work, I needed to write a LLVM dynamic analysis pass like the countLoads pass from assignment 2. SimPoints uses frequency vectors, which indicate how many times each basic block of a program executed. SimPoints had links to tools which did this but 1 of the links was broken, and the others did not support x86-64 (one needed a processor which no longer exists and an outdated operating system, the other may have supported x86-64 but needed an outdaded operating system). My dynamic analysis code is more complex than countLoads. It uses a dynamically sized array to create a counter for each basic block. When the pass inserts the function call, it gives each function a constant unique ID value as the first parameter to the function. Finally, SimPoints needs each vector to correspond to a fixed number of instructions executed. To do this, I pass in the length of each LLVM-IR basic block as the second parameter to the function. The function uses an internal counter to detect the intervals based on the length of each basic block. The vectors are placed into a counts.bb output file.
