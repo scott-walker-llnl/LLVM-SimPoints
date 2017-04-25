@@ -1,12 +1,12 @@
 # LLVM-SimPoints
 ##### Author: Scott Walker | walker8@email.arizona.edu
 ##### Contents
-[Intro][#intro]
-[Building][#building]
-[Explanation of SimPoints][#explanation-of-simpoints]
-[Example][#testing-a-benchmark]
-[Instructions][#using-llvm-simpoints]
-[Connections][#connections]
+[Intro][#user-content-intro]
+[Building][#user-content-building]
+[Explanation of SimPoints][#user-content-explanation-of-simpoints]
+[Example][#user-content-testing-a-benchmark]
+[Instructions][#user-content-using-llvm-simpoints]
+[Connections][#user-content-connections]
 ### Intro
 LLVM-SimPoints is an updated version of the original SimPoints project which has not been updated since 2006. This project consists of two components: a dynamic LLVM analysis pass that produces execution frequency vectors for basic blocks of a program, and the SimPoints analysis code which uses a k-means like algorithm to find the clusters of computation in a program. The SimPoints analysis code is relatively untouched, but has been updated so that it will compile on modern machines. I do not recommend using the original SimPoints source code.
 
@@ -70,7 +70,7 @@ Back in the day, when people were simulating their programs on new theoretical p
 One problem with collecting the basic block vectors for SimPoints is that, like any dynamic analysis, it makes the program run much slower. From what I saw, my dynamic analysis pass caused a 2x slowdown. Also, my pass approximates the instruction intervals, since they are based on LLVM-IR instead of x86 assembly. However, I think that this is probably an improvement, since LLVM-IR instructions account for logical operations. In the original method of doing the intervals based on x86 assembly instructions, an interval may end in the middle of an important operation. For example, you would not want the interval to end in the middle of an "alloca", which is multiple x86 instructions.
 
 ### Testing a Benchmark
-You can test LLVM-SimPoints on any program. I have included an example for running it on LULESH. Build the [LLVM Dynamic Analysis Pass][#build-dynamic-analysis-pass] first.
+You can test LLVM-SimPoints on any program. I have included an example for running it on LULESH. Build the [LLVM Dynamic Analysis Pass][#user-content-build-dynamic-analysis-pass] first.
 ```
 mkdir bin
 cd lulesh2.0.3
