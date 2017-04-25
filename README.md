@@ -4,29 +4,45 @@
 LLVM-SimPoints is an updated version of the original SimPoints project which has not been updated since 2006. This project consists of two components: a dynamic LLVM analysis pass that produces execution frequency vectors for basic blocks of a program, and the SimPoints analysis code which uses a k-means like algorithm to find the clusters of computation in a program. The SimPoints analysis code is relatively untouched, but has been updated so that it will compile on modern machines. I do not recommend using the original SimPoints source code.
 
 ### Building
-There are three steps to building and running LLVM-Simpoints. The first is compiling the LLVM dynamic analysis pass, the second is building your program with that pass and executing it. Finally, you feed the .bb file into the SimPoints analysis code to generate clusters and weights for the program. The following shows you how to run the simple example program:
+There are four steps to using LLVM-Simpoints. First, compile the LLVM dynamic analysis pass. Second, build your program with that pass. Third, execute your program, a .bb file will be produced. Finally, feed the .bb file into the SimPoints analysis code to generate the "simpoint" and "weights" files for the program. The following shows you how to run the simple example program:
 
+##### Build Dynamic Analysis Pass
 ```
-mkdir bin
+export TOP=$(pwd)
 cd count_bb
 mkdir build && cd build
 cmake ..
 make
-cd ../..
+cd TOP
+```
+
+##### Build  SimPoints
+```
+cd SimPoint.3.2
+mkdir bin
+make Simpoint
+cd TOP
+```
+
+##### Build Example File
+```
+# Start from top level directory
 make ex
 ./ex.out
-cd SimPoints
-make Simpoint
-cd ..
+```
+
+##### Run SimPoints on Example
+```
+# maxK indicates the maximum centers for kmeans. In other words, the maximum number of program phases.
 SimPoint.3.2/bin/simpoint -maxK 30 -loadFVFile count.bb -saveSimpoints simpoints -saveSimpointWeights weights
 ```
 
-The results of this program are not very interesting because the program is so small, but you should be able to verify how many times each basic block executes by looking at the .bb file.
+The results of the example program are not very interesting because the program is so small, but you should be able to verify how many times each basic block executes by looking at the .bb file.
 
 ### Explanation of SimPoints
 The main idea behind SimPoints is to reduce the amount of code you need to execute to simulate a program. SimPoints identifies the most important portions of a program so that instead of simulating the program in its entirety, you can get within 90-95% of the full program by just executing pieces of it. First, simpoints breaks up a program into intervals of assembly instructions. For any decent sized program, the value 10 million is recommended. You can change the interval used in LLVM-Simpoints by changing the -DINTERVAL number in the compilation step. This value will need to decrease significantly for small programs. Note that you do not need to build the LLVM analysis pass again after changing INTERVAL but you will need to re-build the benchmark. SimPoints then uses k-means to find the centers of each program phase. These clusters tend to correlate to areas of heavy computation within each program phase. Then, when simulating the program, you can execute the basic blocks the number of times specified in the basic block vectors for each SimPoint.
 
-The results in the "simpoints" file tell you which execution intervals are important and gives each execution interval a unique number. For example, here is how to interpret the file:
+The results in the "simpoints" file tell you which execution intervals are important and gives each execution interval a unique number. Note that since this is using k-means with random seeding, you will receive slightly different results every time you run SimPoints. For example, here is how to interpret the file:
 ```
 14772 1
 // For instructions 14772 * interval size to (14772 + 1) * interval size, that is an important interval and we assign it ID 1.
@@ -46,6 +62,7 @@ Back in the day, when people were simulating their programs on new theoretical p
 You can test LLVM-SimPoints on any program. I have included an example for running it on LULESH.
 ```
 # build the LLVM dynamic analysis pass first, see the first example for details
+mkdir bin
 cd lulesh2.0.3
 make all
 cd ..
