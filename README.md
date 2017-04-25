@@ -59,9 +59,8 @@ I added a step to the countBB pass that prints out the llvm IR of each basic blo
 Back in the day, when people were simulating their programs on new theoretical processors to see if there would be any improvements, SimPoints made performing such simulations much faster. Normally simulating a processor means the programs running on the simulator will be really slow. I'm unsure of how much this is done in modern days though. I chose this project because I am using this kind of analysis to find important basic blocks in a program so that, based on the basic blocks, I can understand program behavior as a whole. One problem with collecting the basic block vectors for SimPoints is that, like any dynamic analysis, it makes the program run much slower. From what I saw, my dynamic analysis pass caused a 2x slowdown. Also, my pass approximates the instruction intervals, since they are based on LLVM-IR instead of x86 assembly. However, I think that this is probably an improvement, since LLVM-IR instructions account for logical operations. In the original method of doing the intervals based on x86 assembly instructions, an interval may end in the middle of an important operation.
 
 ### Testing a Benchmark
-You can test LLVM-SimPoints on any program. I have included an example for running it on LULESH.
+You can test LLVM-SimPoints on any program. I have included an example for running it on LULESH. Build the [LLVM Dynamic Analysis Pass][##### Build Dynamic Analysis Pass] first.
 ```
-# build the [LLVM Dynamic Analysis Pass][##### Build Dynamic Analysis Pass] first
 mkdir bin
 cd lulesh2.0.3
 make all
