@@ -106,15 +106,4 @@ bool count_bb::runOnBasicBlock(Function::iterator &BB)
 
 } //end namespace
 
-// Automatically enable the pass.
-// http://adriansampson.net/blog/clangpass.html
-/*
-static void registerSkeletonPass(const PassManagerBuilder &,
-                         legacy::PassManagerBase &PM) {
-  PM.add(new SkeletonPass());
-}
-static RegisterStandardPasses
-  RegisterMyPass(PassManagerBuilder::EP_EarlyAsPossible,
-                 registerSkeletonPass);
-*/
 static RegisterPass<count_bb> X("countBB", "counting basic block executions", false, false);
