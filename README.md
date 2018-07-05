@@ -3,6 +3,10 @@
 ### Intro
 LLVM-SimPoints is an updated version of the original SimPoints project which has not been updated since 2006. This project consists of two components: a dynamic LLVM analysis pass that produces execution frequency vectors for basic blocks of a program, and the SimPoints analysis code which uses a k-means like algorithm to find the clusters of computation in a program. The SimPoints analysis code is relatively untouched, but has been updated so that it will compile on modern machines. I do not recommend using the original SimPoints source code.
 
+### Prerequisites
+Required Packages: LLVM-3 or 4, plus LLVM-3/4-dev 
+LLVM-SimPoints has been tested on LLVM-3.x and 4.x. It does not work on LLVM-6+, and has not been tested on 5.x. It should be a minor patch to add this compatibility but I may not get around to this for a while. If you have a patch feel free to submit it.
+
 ### Building
 There are four steps to using LLVM-Simpoints. First, compile the LLVM dynamic analysis pass. Second, build your program with that pass. Third, execute your program, a .bb file will be produced. Finally, feed the .bb file into the SimPoints analysis code to generate the "simpoint" and "weights" files for the program. You can build and run LLVM-SimPoints on an example and lulesh using the "build_example.sh" and "build_lulesh.sh" scripts respectively.
 
